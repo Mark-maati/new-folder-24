@@ -1,0 +1,14 @@
+{
+  "name": "new-folder-(24)",
+  "version": "1.0.0",
+  "description": "Local clone of david-hckh.com",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
