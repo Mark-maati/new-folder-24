@@ -51,8 +51,110 @@
         <use href="#logo-path" class="preloader-path" mask="url(#preloader-mask)"></use>
       </svg>
     </div>
-  
 
+  <script>
+    (function () {
+      var username = "Mark-maati";
+      var maxRepos = 6;
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function repoDescription(repo) {
+        var language = repo.language ? repo.language + " | " : "";
+        var stars = typeof repo.stargazers_count === "number" ? "Stars: " + repo.stargazers_count : "";
+        var description = repo.description || "GitHub repository";
+        return escapeHtml(language + stars + (language || stars ? " - " : "") + description);
+      }
+
+      function createRepoCard(repo) {
+        var name = escapeHtml(repo.name);
+        var link = escapeHtml(repo.html_url);
+        var description = repoDescription(repo);
+
+        return (
+          '<a class="preview-card children-unclickable" href="' +
+          link +
+          '" target="_blank" rel="noopener noreferrer" data-cursor="arrow-external" aria-label="Open repository ' +
+          name +
+          '">' +
+          '<div class="preview-card-top preview-card-top-empty">' +
+          '<svg viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible" class="preview-card-top-empty-icon">' +
+          '<path d="M128 0V256" stroke="currentColor" stroke-width="var(--stroke-width, var(--stroke-md))" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>' +
+          '<path d="M0 128L256 128" stroke="currentColor" stroke-width="var(--stroke-width, var(--stroke-md))" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>' +
+          '</svg>' +
+          '</div>' +
+          '<div class="preview-card-content">' +
+          '<div class="preview-card-copys">' +
+          '<h3 class="preview-card-title">' +
+          name +
+          '</h3>' +
+          '<p class="preview-card-description">' +
+          description +
+          '</p>' +
+          '</div>' +
+          '</div>' +
+          '</a>'
+        );
+      }
+
+      async function fetchRepos() {
+        var response = await fetch("https://api.github.com/users/" + username + "/repos?sort=updated&per_page=20");
+        if (!response.ok) {
+          throw new Error("Failed to fetch repositories");
+        }
+
+        var repos = await response.json();
+        return repos.filter(function (repo) {
+          return !repo.fork;
+        }).slice(0, maxRepos);
+      }
+
+      async function renderSelectedProjects() {
+        var cardsContainer = document.querySelector(".projects-cards");
+        if (!cardsContainer || cardsContainer.dataset.repoCardsLoaded === "1") {
+          return;
+        }
+
+        try {
+          var repos = await fetchRepos();
+          if (!repos.length) {
+            return;
+          }
+
+          cardsContainer.innerHTML = repos.map(createRepoCard).join("");
+          cardsContainer.dataset.repoCardsLoaded = "1";
+        } catch (error) {
+          console.error("Could not load GitHub repositories:", error);
+        }
+      }
+
+      function initializeRepoCards() {
+        renderSelectedProjects();
+
+        var observer = new MutationObserver(function () {
+          renderSelectedProjects();
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+        window.setTimeout(function () {
+          observer.disconnect();
+        }, 20000);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeRepoCards);
+      } else {
+        initializeRepoCards();
+      }
+    })();
+  </script>
 
 </body></html>
 
