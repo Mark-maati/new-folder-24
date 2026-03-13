@@ -1,7 +1,7 @@
 {
   "name": "new-folder-(24)",
   "version": "1.0.0",
-  "description": "Local clone of david-hckh.com",
+  "description": "Local portfolio clone",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
